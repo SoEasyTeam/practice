@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+
+<body>
+    <div id="root">
+        <section class="email-pw">
+            <h2 class="main-title">이메일로 회원가입</h2>
+            <div class="input-container">
+                <label for="emailInput">이메일</label>
+                <input type="email" id="emailInput" data-state="0" placeholder="이메일 주소를 알려주세요.">
+            </div>
+            <div class="input-container input-container-pw">
+                <label for="passwordInput">비밀번호</label>
+                <input type="password" id="passwordInput" data-state="0" placeholder="비밀번호를 설정해 주세요.">
+            </div>
+            <button type="button" class="next-btn">다음</button>
+        </section>
+
+        <section class="profile" style="display:none">
+            <h2 class="main-title join-profile-title">프로필 설정</h2>
+            <p class="profile-info-txt">나중에 언제든지 변경할 수 있습니다.</p>
+            <label for="profileImg">
+                <img src="http://146.56.183.55:5050/Ellipse.png" alt="" srcset="" id="imagePre">
+            </label>
+            <input type="file" id="profileImg" name="profile-img" accept="image/*" class="ir" />
+            <div class="input-container">
+                <label for="userNameInput">사용자 이름</label>
+                <input type="text" id="userNameInput" data-state="0" placeholder="2~10자 이내여야 합니다.">
+            </div>
+            <div class="input-container">
+                <label for="userIdInput">계정 ID</label>
+                <input type="text" id="userIdInput" data-state="0" placeholder="영문, 숫자, 특수문자(,), (_)만 사용 가능합니다.">
+            </div>
+            <div class="input-container input-container-intro">
+                <label for="userIntroInput">소개</label>
+                <input type="text" id="userIntroInput" data-state="1" placeholder="자신과 판매할 상품에 대해 소개해 주세요.">
+            </div>
+            <button type="button" class="submit-btn">감귤마켓 시작하기</button>
+        </section>
+    </div>
+</body>
+
+<script>
+    //http 서버 주소
+    const url = "https://mandarin.api.weniv.co.kr";
+    //계정ID 중복 검사 함수
+    async function checkAccountnameValid(userId) {
+        //userID의 값이 비어있으면 false를 반환하고 함수종료
+        if (userID == "") {
+            return false;
+        }
+        //계정검증 Request시 body에 들어가는 데이터
+        const reqData = {
+            user: {
+                accountname: "werewrewrwrew",
+            },
+        };
+        //res에는 fetch가 반환해준 Promise객체가 담김.
+        //fetch(전송할 때 필요한 정확한 주소, 전송할 때 함께 보내는 정보 객체)
+        const res = await fetch(url + "/user/accountnamevalid", {
+            //method : 옵션을 POST로 지정해주고
+            method: "POST",
+            //headers 옵션을 통해 JSON 포멧을 사용한다고 알려줘야 한다
+            //서버에게 어떤 형식의 데이터가 실제로 보내지는 것인지 알려주는 용도
+            //application/json : 애플리케이션간 데이터 통신에서 JSON형식이 사용된다라는 의미
+            headers: {
+                "Content-type": "application/json",
+            },
+            //요청 전문을 JSON 포멧으로 직렬화
+            //가장 중요한 body 옵션에 설정해줍니다.
+            //아까 만들어준 reqData를 stringify로 직렬화하여 body에 담아줌
+            // http요청은 모든게 문자열로 되어있어서 그냥 loginData만 넣어주는게 아니라 stringify 해줘야함
+            body: JSON.stringify(reqData),
+        });
+        //json에는 전달받은 res(Promise객체)를 json 형식으로 바꾼 것을 담아준다
+        //{"message":"어쩌구저쩌구"}
+        //이와같은 형식이 json에 담기게 된다.
+        const json = await res.json();
+        //json.message로 접근했을 때
+        //성공했을 때
+        //"사용 가능한 계정ID 입니다."
+        //혹은
+        //"이미 가입된 계정ID 입니다."
+        //두가지 중 하나를 반환하게 되고,
+        //실패하면 다음과 같이 나온다
+        //"잘못된 접근입니다."
+        //만일 message가 사용가능한 계정 ID일 경우 true를 반환하고 함수가 종료된다.
+        if (json.message == "사용 가능한 계정ID 입니다.") {
+            return true;
+        }
+        return false;
+    }
+    //회원가입 함수
+    async function join() {
+        //회원가입 Req에 필요한 정보들 가져오기
+        const email = document.querySelector("#emailInput").value;
+        const password = document.querySelector("#passwordInput").value;
+        const userName = document.querySelector("#userNameInput").value;
+        const userId = document.querySelector("#userIdInput").value;
+        const intro = document.querySelector("#userIntroInput").value;
+        const imageUrl = document.querySelector("#imagePre").src;
+        //계정중복검사 함수에 userID담아 실행
+        const checkedIdResult = await checkAccountnameValid(userId);
+        //userID가 true 혹은 false값을 반환하게 된다.
+        //checkedIdResult엔 true 또는 false값이 담겨질 것이다.
+        //checkedIdResult가 true이면
+        if (checkedIdResult) {
+            //아까 회원가입 Req의 필요한 정보 가져온 것들을 joinData라는 곳에 객체 형식으로 담아준다
+            const joinData = {
+                user: {
+                    username: userName,
+                    email: email,
+                    password: password,
+                    accountname: userId,
+                    intro: intro,
+                    image: imageUrl,
+                },
+            };
+            //fetch(통신할 서버의 정확한 주소, 함께 보낼 정보)
+            fetch(url + "/user", {
+                //method : 옵션을 POST로 지정해주고
+                method: "POST",
+                headers: {
+                    //headers 옵션을 통해 JSON 포멧을 사용한다고 알려줘야 한다
+                    //서버에게 어떤 형식의 데이터가 실제로 보내지는 것인지 알려주는 용도
+                    //application/json : 애플리케이션간 데이터 통신에서 JSON형식이 사용된다라는 의미
+                    "Content-type": "application/json",
+                },
+                //요청 전문을 JSON 포멧으로 직렬화
+                //가장 중요한 body 옵션에 설정해줍니다.
+                //아까 만들어준 joinData를 stringify로 직렬화하여 body에 담아줌
+                body: JSON.stringify(joinData),
+            });
+        }
+    }
+    //회원가입 버튼
+    const $joinButton = document.querySelector(
+        "#root > section.profile > button"
+    );
+    //회원가입 버튼 누르면 join함수 호출
+    $joinButton.addEventListener("click", join);
+</script>
+
+
+</script>
+
+</html>

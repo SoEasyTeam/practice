@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <main class="login-email">
+        <h1 class="main-title login-email-title">
+            로그인
+        </h1>
+        <section class="login-email-container">
+            <h2 class="ir">이메일, 비밀번호 입력 컨테이너</h2>
+            <form>
+                <div class="input-container">
+                    <label for="">이메일</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="input-container input-container-pw">
+                    <label for="">비밀번호</label>
+                    <input type="password" id="pw">
+                </div>
+                <button id="login-btn" class="init-button l-button disabled-button login-btn" type="button">로그인</button>
+                <button class="join-email-btn" type="button">이메일로 회원가입</a>
+            </form>
+        </section>
+    </main>
+    <script>
+        const getLoginData = () =>{
+            const email = document.querySelector('#email').value;
+            const pw = document.querySelector('#pw').value;
+            const loginData = {
+                'user' : {
+                    'email': email,
+                    'password': password
+                }
+            }
+
+            return loginData
+        }
+        async function login() {
+            const loginData = getLoginData();
+            const url = 'https://mandarin.api.weniv.co.kr';
+            const reqPath = '/user/login';
+            const res = await fetch(url+reqPath, {
+                method: 'POST',
+                headers: {
+                    'Content-type' : 'application/json'
+                },
+                body:JSON.stringify(loginData) // http요청은 모든게 문자열로 되어있어서 그냥 loginData만 넣어주는게 아니라 stringify 해줘야함
+            });
+            const json = await res.json();
+        }
+
+        const loginButton = document.querySelector("#login-btn");
+        loginButton.addEventListener("click", login)
+
+    </script>
+</body>
+</html>
+
